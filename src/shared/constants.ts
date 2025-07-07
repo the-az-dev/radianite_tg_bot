@@ -6,6 +6,7 @@ const channeltype = ["channel"];
 
 // IDs for chats
 const chatFindId = 15;
+const playMatchChatId = 1587;
 
 // Basic constant duration for deleting welcome message and re-freshing reputation for each user.
 const deletingTime = 5 * 60 * 1000;
@@ -25,6 +26,52 @@ const yesMatchDefaultMin = 0.55;
 const yesMatchDefaultMax = 0.95;
 const mmrCountingCoef = 10;
 const randomBonus = Math.floor(Math.random() * 5);
+
+const mapsList = [
+  "Ascent",
+  "Abbyss",
+  "Bind",
+  "Breezze",
+  "Corrode",
+  "Haven",
+  "Icebox",
+  "Split",
+  "Sunset",
+  "Fracture",
+  "Lotus",
+];
+const rankList = [
+  "Iron 1",
+  "Iron 2",
+  "Iron 3",
+  "Bronze 1",
+  "Bronze 2",
+  "Bronze 3",
+  "Silver 1",
+  "Silver 2",
+  "Silver 3",
+  "Gold 1",
+  "Gold 2",
+  "Gold 3",
+  "Platinum 1",
+  "Platinum 2",
+  "Platinum 3",
+  "Diamond 1",
+  "Diamond 2",
+  "Diamond 3",
+  "Ascendant 1",
+  "Ascendant 2",
+  "Ascendant 3",
+  "Immortall 1",
+  "Immoratall 2",
+  "Immoratall 3",
+  "Radiant",
+];
+
+const rankMMRList = [
+  100, 500, 1001, 1502, 2003, 2654, 3105, 3706, 4208, 4809, 5310, 5911, 6412,
+  7113, 7614, 8215, 8816, 9417, 10118, 10619, 11220, 11921, 12422, 12923, 15000,
+];
 
 // All messages can be updated or using more that 1 time for each rumble in the chat.
 // Note - if u wanna update it beyond all app - use config or env files
@@ -63,8 +110,7 @@ const welcomeMessageGroup = `
 
 Щоб додати інформацію про себе — напиши мені в <a href="https://t.me/Radianite_bot">особисті</a>.
 `;
-const usersInfoMessageGroup =
-  `Інформація про Валорантера:
+const usersInfoMessageGroup = `Інформація про Валорантера:
 Вік: {age};
 Годин в грі: {game_hours}
 Lvl гравця: {game_lvl};
@@ -101,17 +147,27 @@ const reportMessageUser = "⚠️ Скарга відправлена! Очік�
 const reportMessageAdmin =
   '⚠️ Отримано скаргу на користувача.\n📋 Повідомлення на яке поскаржились можете глянути <a href=https://t.me/c/{message_link}"">тут</a>.\nПерегляньте ситуацію і зробіть виважені дії!';
 const noDataContained = "📋 Відсутня інформація";
-const noDataAboutUserMessage = "Або я в очі довбусь, або про нього 0 інфи 🤔\nСпробуйте іншим разом!";
+const noDataAboutUserMessage =
+  "Або я в очі довбусь, або про нього 0 інфи 🤔\nСпробуйте іншим разом!";
 const noStatsMessageGroup = "Поки що все голо... Дивно якось насправді...";
-const mmrUpMessageGroup = "ОГО! Апнув ММР-чик сьогодні заїбенно 😏 Підняв на +{mmr_number}. Тепер у тебе - {total_points} поінтів.\nІ памятай! Ми не Ріоти - ми рахуємо з урахуванням репутації і твоєї везучості 😉\nНаступне оновлення через - {refresh_time}";
-const mmrDownMessageGroup = "ХА-ХА! Схавав? Просрав аж -{mmr_number}. А скільки в тебе зараз? Аж, {total_points} поінтів 🙃\nGG EZ BOTZ 😈\nПриходь через {refresh_time}, якщо не слабак 🤓";
-const noMMRMessageGroup = "ОГО... Нічия... Поінтів не дало, тому у тебе стабільно - {total_points}\nСпробуй ще раз через {refresh_time}!";
-const mmrZeroMessageGroup = "Ти не маєш MMR-у! Іди калібруся 🤓\nНаступне оновлення через - {refresh_time}";
-const usersMMRMessageGroup = "Твій MMR наразі - {total_points}";
-const timeForMMRNotRefreshed = "Ти вже отримав свої ММР! Потерпи ще {refresh_time}";
+const mmrUpMessageGroup =
+  "ОГО! Апнув ММР-чик сьогодні заїбенно на {map} 😏 Підняв на +{mmr_number}. Тепер у тебе - {total_points} поінтів.\nІ памятай! Ми не Ріоти - ми рахуємо з урахуванням репутації і твоєї везучості 😉";
+const mmrDownMessageGroup =
+  "ХА-ХА! Схавав на {map}? Просрав аж -{mmr_number}. А скільки в тебе зараз? Аж, {total_points} поінтів 🙃\nGG EZ BOTZ 😈\nПриходь ще, якщо не слабак 🤓";
+const noMMRMessageGroup =
+  "ОГО... Нічия... Поінтів не дало, тому у тебе стабільно - {total_points}";
+const mmrZeroMessageGroup = "Ти не маєш MMR-у! Іди калібруся 🤓";
+const usersMMRMessageGroup = "Твій MMR наразі - {total_points}\nРанг на базі ММР у тебе - {rank}";
+const usersMMRMessageGroupResponse = "MMR гравця @{user} наразі - {total_points}\nРанг на базі ММР у нього/неї - {rank}";
+const timeForMMRNotRefreshed =
+  "Ти вже отримав свої ММР! Потерпи ще {refresh_time}";
 const startMatchYes = "Раджу зарегати катку! 100% виграєте 🫶";
-const startMatchNo = "Ви шо хворі? Не регайте катку! А хотя.. Регайте, якщо садомазахісти 🤓";
-const notForFindThread = "Не та гілка для пошуку! Хоча я не здивуюсь що ти так само мажеш і в ранкеді 🙃"
+const startMatchNo =
+  "Ви шо хворі? Не регайте катку! А хотя.. Регайте, якщо садомазахісти 🤓";
+const notForFindThread =
+  "Не та гілка для пошуку! Хоча я не здивуюсь що ти так само мажеш і в ранкеді 🙃";
+
+const howToPlayMatchMessage = ``;
 
 export {
   adminTypes,
@@ -150,6 +206,7 @@ export {
   noMMRMessageGroup,
   mmrZeroMessageGroup,
   usersMMRMessageGroup,
+  usersMMRMessageGroupResponse,
   timeForMMRNotRefreshed,
   startMatchYes,
   startMatchNo,
@@ -166,5 +223,10 @@ export {
   mmrUpdatingTime,
   mmrCountingCoef,
   randomBonus,
-  reputationCooldown
+  reputationCooldown,
+  playMatchChatId,
+  rankList,
+  rankMMRList,
+  mapsList,
+  howToPlayMatchMessage,
 };

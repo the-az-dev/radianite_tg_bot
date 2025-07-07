@@ -6,6 +6,7 @@ import {
   mmrProbability,
   mmrUpMessageGroup,
   noMMRMessageGroup,
+  playMatchChatId,
   startMatchNo,
   startMatchYes,
   usersMMRMessageGroup,
@@ -14,6 +15,12 @@ import {
   yesMatchNightMax,
   yesMatchNightMin,
   zeroMMRProbality,
+  howToPlayMatchMessage,
+  mapsList,
+  rankList,
+  rankMMRList,
+  needReplyMessage,
+  usersMMRMessageGroupResponse,
 } from "../../../shared/constants";
 import { userRepository } from "../../../shared/repositories";
 import User from "../../../shared/entity/user.entity";
@@ -21,17 +28,28 @@ import User from "../../../shared/entity/user.entity";
 export default class RandomizedCommands {
   constructor(private bot: Telegraf) {
     this.bot.command("start_match_or_not", this.startGame);
-    this.bot.command("my_mmr", this.showMMR);
-    this.bot.command("get_mmr", this.getMMR);
+    this.bot.command("my_rank", this.showMMR);
+    this.bot.command("get_rank", this.showUsersMMR);
+    this.bot.command("play_match", this.getMMR);
+    this.bot.command("how_play_match", this.howToPlayMatch);
+  }
+  howToPlayMatch(ctx) {
+    ctx.reply(howToPlayMatchMessage);
   }
   getMMR = async (ctx) => {
     const newMMR = this.getMMRNumber(minimumMMRPoints, maximumMMRPoints);
     const chatId = ctx.chat.id;
     const messageId = ctx.message.message_id;
 
+    if (ctx.message.message_thread_id !== playMatchChatId)
+      return ctx.reply("Грати можна лише в гілці 'Зарегати катку' 🙃");
+
     const currUser = await userRepository.findOneBy({ userId: ctx.from.id });
 
-    if(currUser === null) return ctx.reply("Використай команду /reg аби додатись до системи 😉");
+    if (currUser === null)
+      return ctx.reply(
+        "Використай команду /reg аби не смурфити 😉\nЦе так Ріоти сказали, я тут ні до чого 🫣"
+      );
     const mmr = currUser.mmr === null ? 0 : currUser.mmr;
     currUser.mmr = Number(mmr) + Number(newMMR);
     currUser.updatedMmrAt = new Date();
@@ -48,17 +66,19 @@ export default class RandomizedCommands {
         }
       );
 
+    const mapId = Math.floor(Math.random() * mapsList.length);
+
     ctx.telegram.sendMessage(
       chatId,
       newMMR < 0
         ? mmrDownMessageGroup
+            .replace("{map}", mapsList[mapId])
             .replace("{mmr_number}", String(newMMR * -1))
             .replace("{total_points}", `${currUser.totalMMR}`)
-            .replace("{refresh_time}", "24h")
         : mmrUpMessageGroup
+            .replace("{map}", mapsList[mapId])
             .replace("{mmr_number}", String(newMMR))
-            .replace("{total_points}", `${currUser.totalMMR}`)
-            .replace("{refresh_time}", "24h"),
+            .replace("{total_points}", `${currUser.totalMMR}`),
       {
         parse_mode: "HTML",
         reply_to_message_id: messageId,
@@ -68,17 +88,55 @@ export default class RandomizedCommands {
     await userRepository.save(currUser);
   };
 
+  showUsersMMR = async (ctx) => {
+    const chatId = ctx.chat.id;
+    const messageId = ctx.message.message_id;
+
+    const replyTo = ctx.message.reply_to_message;
+    if (!replyTo) return ctx.reply(needReplyMessage);
+
+    const currUser: User = await userRepository.findOneBy({
+      userId: replyTo.from.id,
+    });
+
+    if (currUser === null)
+      return ctx.reply("Немає в системі, спробуй пізніше 🙃");
+
+    ctx.telegram.sendMessage(
+      chatId,
+      usersMMRMessageGroupResponse
+        .replace("{user}", currUser.username)
+        .replace("{total_points}", `${currUser.totalMMR}`)
+        .replace(
+          "{rank}",
+          `${rankList[rankMMRList.findIndex((e) => currUser.totalMMR < e)]}`
+        ),
+      {
+        parse_mode: "HTML",
+        reply_to_message_id: messageId,
+      }
+    );
+  };
+
   showMMR = async (ctx) => {
     const chatId = ctx.chat.id;
     const messageId = ctx.message.message_id;
 
-    const currUser: User = await userRepository.findOneBy({ userId: ctx.from.id });
+    const currUser: User = await userRepository.findOneBy({
+      userId: ctx.from.id,
+    });
 
-    if(currUser === null) return ctx.reply("Використай команду /reg аби додатись до системи 😉");
+    if (currUser === null)
+      return ctx.reply("Використай команду /reg аби додатись до системи 😉");
 
     ctx.telegram.sendMessage(
       chatId,
-      usersMMRMessageGroup.replace("{total_points}", `${currUser.totalMMR}`),
+      usersMMRMessageGroup
+        .replace("{total_points}", `${currUser.totalMMR}`)
+        .replace(
+          "{rank}",
+          `${rankList[rankMMRList.findIndex((e) => currUser.totalMMR < e)]}`
+        ),
       {
         parse_mode: "HTML",
         reply_to_message_id: messageId,
