@@ -34,7 +34,9 @@ export default class RandomizedCommands {
     this.bot.command("how_play_match", this.howToPlayMatch);
   }
   howToPlayMatch(ctx) {
-    ctx.reply(howToPlayMatchMessage);
+    ctx.reply(howToPlayMatchMessage, {
+      parse_mode: "HTML",
+    });
   }
   getMMR = async (ctx) => {
     const newMMR = this.getMMRNumber(minimumMMRPoints, maximumMMRPoints);
