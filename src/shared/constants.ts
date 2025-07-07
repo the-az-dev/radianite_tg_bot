@@ -17,7 +17,7 @@ const mmrUpdatingTime = 1 * 60 * 1000 * 24;
 // Basic number data for some elements
 const maximumMMRPoints = 30;
 const minimumMMRPoints = -29;
-const mmrProbability = 0.56;
+const mmrProbability = 0.428;
 const zeroMMRProbality = 0.005;
 const yes_noMatchProbability = 0.5;
 const yesMatchNightMin = 0.1;
