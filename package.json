@@ -1,0 +1,33 @@
+{
+  "name": "valorant_chat_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:prod": "ts-node ./src/main.ts --prod",
+    "start:prod-dev": "ts-node-dev ./src/main.ts --prod",
+    "start:dev": "ts-node-dev ./src/main.ts --dev",
+    "build:dev": "",
+    "build:prod": "",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.0.1",
+    "mysql2": "^3.14.1",
+    "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
+    "telegraf": "^4.16.3",
+    "tsx": "^4.20.3",
+    "typeorm": "^0.3.25"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}
