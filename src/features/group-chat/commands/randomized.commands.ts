@@ -130,6 +130,11 @@ export default class RandomizedCommands {
 
     if (currUser === null)
       return ctx.reply("Використай команду /reg аби додатись до системи 😉");
+    let rankId = 0;
+    
+    if (currUser.totalMMR >= rankMMRList[rankList.length - 1]) {
+      rankId = rankList.length - 1;
+    } else rankId = rankMMRList.findIndex((e) => currUser.totalMMR < e);
 
     ctx.telegram.sendMessage(
       chatId,
@@ -137,7 +142,13 @@ export default class RandomizedCommands {
         .replace("{total_points}", `${currUser.totalMMR}`)
         .replace(
           "{rank}",
-          `${rankList[rankMMRList.findIndex((e) => currUser.totalMMR < e)]}`
+          `${
+            rankList[
+              rankId !== 0 && rankId !== rankList.length - 1
+                ? rankId - 1
+                : rankId
+            ]
+          }`
         ),
       {
         parse_mode: "HTML",
